@@ -1,0 +1,191 @@
+<html><head>
+    PSY21D CANCELLATION MACHINE
+</head>
+<body style="padding: 0;
+margin: 0;
+display: flex;
+flex-flow: column;
+direction: rtl;
+align-content: center;
+flex-wrap: wrap;">
+    <script>
+        let ebaninatuck = [0, 0];
+        let cursor = (el, ev) => {
+            ebaninasize = [ 144, 144 ]; 
+            let stX, stY;
+            let cancelation_machine = document.getElementById("cancelation_machine");
+            let module = document.getElementById("canceling");
+            let module_position = [ 0, 0 ];
+            module_position [ 0 ] = module.offsetLeft;
+            module_position [ 1 ] = module.offsetTop;
+            if (el.id === "cancelation_machine") {
+                ev.layerX
+                ev.layerY
+                stX = (ebaninatuck[0] + ev.layerX - ebaninasize[0]/2);
+                stY = (ebaninatuck[1] + ev.layerY - ebaninasize[1]/2);
+            } else if (el.id === "canceling") { 
+                stX = (ev.layerX - ebaninasize[0]/2) + module_position [ 0 ];
+                stY = (ev.layerY - ebaninasize[1]/2) + module_position [ 1 ];
+            } else {
+                console.log("fucking misclick");
+                return "fucking misclick";
+            };
+            ebaninatuck = [ stX, stY];
+            cancelation_machine.style.left = ebaninatuck [ 0 ] + "px";
+            cancelation_machine.style.top  = ebaninatuck [ 1 ] + "px";
+        }
+    </script>
+    <div id="bravargl">
+        <canvas style="position: relative;" onclick="cursor(this, event)" id="canceling" width="300" height="300"></canvas>
+        <img onclick="cursor(this, event)" id="cancelation_machine" style="position:absolute; left: calc(150px - 144px/2); top: calc(150px - 144px/2);" src="https://e.unicode-table.com/orig/c1/d9d88630432cf61ad335df98ce37d6.png" alt="Cross Mark">
+    </div>
+    <br>Гадкий, но очень прикольный код, чтобы закенселить что-либо крестиком.
+    <br>Думали, что я не умею писать гадкий код и визуалы? Умею!
+    <br>Инструкция по применению:
+    <br>1. Copy image data into clipboard or press Print Screen
+    <br>2. Press Ctrl+V
+    <br>Кликнуть в нужное место картинки
+    <br>Retry 1.
+    <script type="text/javascript">
+        var CLIPBOARD = new CLIPBOARD_CLASS("canceling", true);
+
+        /**
+         * image pasting into canvas
+         * 
+         * @param {string} canvas_id - canvas id
+         * @param {boolean} autoresize - if canvas will be resized
+         */
+        function CLIPBOARD_CLASS(canvas_id, autoresize) {
+            var _self = this;
+            var canvas = document.getElementById(canvas_id);
+            var ctx = document.getElementById(canvas_id).getContext("2d");
+            var ctrl_pressed = false;
+            var command_pressed = false;
+            var paste_event_support;
+            var pasteCatcher;
+
+            //handlers
+            document.addEventListener('keydown', function (e) {
+                _self.on_keyboard_action(e);
+            }, false); //firefox fix
+            document.addEventListener('keyup', function (e) {
+                _self.on_keyboardup_action(e);
+            }, false); //firefox fix
+            document.addEventListener('paste', function (e) {
+                _self.paste_auto(e);
+            }, false); //official paste handler
+
+            //constructor - we ignore security checks here
+            this.init = function () {
+                pasteCatcher = document.createElement("div");
+                pasteCatcher.setAttribute("id", "paste_ff");
+                pasteCatcher.setAttribute("contenteditable", "");
+                pasteCatcher.style.cssText = 'opacity:0;position:fixed;top:0px;left:0px;width:10px;margin-left:-20px;';
+                document.body.appendChild(pasteCatcher);
+
+                // create an observer instance
+                var observer = new MutationObserver(function(mutations) {
+                    mutations.forEach(function(mutation) {
+                        if (paste_event_support === true || ctrl_pressed == false || mutation.type != 'childList'){
+                            //we already got data in paste_auto()
+                            return true;
+                        }
+
+                        //if paste handle failed - capture pasted object manually
+                        if(mutation.addedNodes.length == 1) {
+                            if (mutation.addedNodes[0].src != undefined) {
+                                //image
+                                _self.paste_createImage(mutation.addedNodes[0].src);
+                            }
+                            //register cleanup after some time.
+                            setTimeout(function () {
+                                pasteCatcher.innerHTML = '';
+                            }, 20);
+                        }
+                    });
+                });
+                var target = document.getElementById('paste_ff');
+                var config = { attributes: true, childList: true, characterData: true };
+                observer.observe(target, config);
+            }();
+            //default paste action
+            this.paste_auto = function (e) {
+                paste_event_support = false;
+                if(pasteCatcher != undefined){
+                    pasteCatcher.innerHTML = '';
+                }
+                if (e.clipboardData) {
+                    var items = e.clipboardData.items;
+                    if (items) {
+                        paste_event_support = true;
+                        //access data directly
+                        for (var i = 0; i < items.length; i++) {
+                            if (items[i].type.indexOf("image") !== -1) {
+                                //image
+                                var blob = items[i].getAsFile();
+                                var URLObj = window.URL || window.webkitURL;
+                                var source = URLObj.createObjectURL(blob);
+                                this.paste_createImage(source);
+                            }
+                        }
+                        e.preventDefault();
+                    }
+                    else {
+                        //wait for DOMSubtreeModified event
+                        //https://bugzilla.mozilla.org/show_bug.cgi?id=891247
+                    }
+                }
+            };
+            //on keyboard press
+            this.on_keyboard_action = function (event) {
+                k = event.keyCode;
+                //ctrl
+                if (k == 17 || event.metaKey || event.ctrlKey) {
+                    if (ctrl_pressed == false)
+                        ctrl_pressed = true;
+                }
+                //v
+                if (k == 86) {
+                    if (document.activeElement != undefined && document.activeElement.type == 'text') {
+                        //let user paste into some input
+                        return false;
+                    }
+
+                    if (ctrl_pressed == true && pasteCatcher != undefined){
+                        pasteCatcher.focus();
+                    }
+                }
+            };
+            //on kaybord release
+            this.on_keyboardup_action = function (event) {
+                //ctrl
+                if (event.ctrlKey == false && ctrl_pressed == true) {
+                    ctrl_pressed = false;
+                }
+                //command
+                else if(event.metaKey == false && command_pressed == true){
+                    command_pressed = false;
+                    ctrl_pressed = false;
+                }
+            };
+            //draw pasted image to canvas
+            this.paste_createImage = function (source) {
+                var pastedImage = new Image();
+                pastedImage.onload = function () {
+                    if(autoresize == true){
+                        //resize
+                        canvas.width = pastedImage.width;
+                        canvas.height = pastedImage.height;
+                    }
+                    else{
+                        //clear canvas
+                        ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    }
+                    ctx.drawImage(pastedImage, 0, 0);
+                };
+                pastedImage.src = source;
+            };
+        }
+</script><div id="paste_ff" contenteditable="" style="opacity: 0; position: fixed; top: 0px; left: 0px; width: 10px; margin-left: -20px;"></div>
+
+<div class="as-console-wrapper"><div class="as-console"></div></div></body></html>
