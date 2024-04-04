@@ -36,7 +36,14 @@ flex-wrap: wrap;">
         }
     </script>
     <div id="bravargl">
-        <canvas style="position: relative;" onclick="cursor(this, event)" id="canceling" width="300" height="300"></canvas>
+        <canvas 
+            style="position: relative;"
+            onclick="cursor(this, event)"
+            id="canceling"
+            width="300"
+            height="300"
+        >
+        </canvas>
         <img 
             onclick="cursor(this, event)" 
             id="cancelation_machine" 
@@ -182,17 +189,25 @@ flex-wrap: wrap;">
             //draw pasted image to canvas
             this.paste_createImage = function (source) {
                 var pastedImage = new Image();
+                
+                var height = document.body.clientHeight;
+                var width = document.body.clientWidth;
+
                 pastedImage.onload = function () {
+                    var propkaX = pastedImage.width / width;
+                    var propkaY = pastedImage.height / height;
+
+                    var gPropka = Math.max(propkaX, propkaY);
+                    var scanPropka = propkaY / propkaX;
+
                     if(autoresize == true){
                         //resize
-                        canvas.width = pastedImage.width;
-                        canvas.height = pastedImage.height;
+                        canvas.width = width / scanPropka;
+                        canvas.height = height;
                     }
-                    else{
-                        //clear canvas
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    }
-                    ctx.drawImage(pastedImage, 0, 0);
+                    //clear canvas
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    ctx.drawImage(pastedImage, 0, 0, canvas.width, canvas.height);
                 };
                 pastedImage.src = source;
             };
