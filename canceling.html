@@ -1,4 +1,9 @@
-<html><head>
+<html>
+<head>
+    <div id="scroller" style="overflow: scroll; width: 60em;">
+        <div style="width: 600em; height: 30px;">
+        </div>
+    </div>
     PSY21D CANCELLATION MACHINE
 </head>
 <body style="padding: 0;
@@ -193,6 +198,9 @@ flex-wrap: wrap;">
                 var height = document.body.clientHeight;
                 var width = document.body.clientWidth;
 
+                let scroller = document.getElementById('scroller');
+                let pro = Math.abs(scroller.scrollLeft / scroller.clientWidth / 10);
+
                 pastedImage.onload = function () {
                     var propkaX = pastedImage.width / width;
                     var propkaY = pastedImage.height / height;
@@ -202,8 +210,8 @@ flex-wrap: wrap;">
 
                     if(autoresize == true){
                         //resize
-                        canvas.width = width / scanPropka;
-                        canvas.height = height;
+                        canvas.width = width / scanPropka * pro;
+                        canvas.height = height * pro;
                     }
                     //clear canvas
                     ctx.clearRect(0, 0, canvas.width, canvas.height);
