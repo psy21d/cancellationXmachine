@@ -200,6 +200,7 @@ flex-wrap: wrap;">
 
                 let scroller = document.getElementById('scroller');
                 let pro = Math.abs(scroller.scrollLeft / scroller.clientWidth / 10);
+                window.pro = pro;
 
                 pastedImage.onload = function () {
                     var propkaX = pastedImage.width / width;
